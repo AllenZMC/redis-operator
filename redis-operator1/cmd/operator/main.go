@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"fmt"
-	client "github.com/jw-s/redis-operator/pkg/generated/clientset"
+	client "github.com/jw-s/redis-operator/pkg/generated/clientset/versioned"
 	redisinformers "github.com/jw-s/redis-operator/pkg/generated/informers/externalversions"
 	"github.com/jw-s/redis-operator/pkg/operator/controller"
 	"github.com/jw-s/redis-operator/pkg/operator/util"

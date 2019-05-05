@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/jw-s/redis-operator/pkg/apis/redis/v1"
-	redisclient "github.com/jw-s/redis-operator/pkg/generated/clientset/typed/redis/v1"
+	redisclient "github.com/jw-s/redis-operator/pkg/generated/clientset/versioned/typed/redis/v1"
 	"github.com/jw-s/redis-operator/pkg/operator/spec"
 	"github.com/sirupsen/logrus"
 )
@@ -34,7 +34,7 @@ func New(config Config, redis *v1.Redis) *Redis {
 		Config: config,
 	}
 
-	redis.Spec.ApplyDefaults(spec.GetSentinelConfigMapName(redis.Name))
+	redis.Spec.ApplyDefaults(spec.GetSentinelConfigMapName(redis.Name), spec.GetRedisConfigMapName(redis.Name))
 
 	newRedis.Redis = redis
 

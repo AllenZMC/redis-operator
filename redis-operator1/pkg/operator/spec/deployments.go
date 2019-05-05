@@ -70,15 +70,15 @@ func SentinelDeployment(owner *v1.Redis) *appsv1beta1.Deployment {
 							ImagePullPolicy: apiv1.PullAlways,
 							Command: []string{
 								"cp",
-								fmt.Sprintf("%s/%s", ConfMountPath, ConfigMapConfKeyName),
-								fmt.Sprintf("%s/%s", DataMountPath, ConfigMapConfKeyName),
+								fmt.Sprintf("%s/%s", ConfMountPath, sentinelConfigFileName),
+								fmt.Sprintf("%s/%s", DataMountPath, sentinelConfigFileName),
 							},
 							VolumeMounts: GetVolumeMounts(),
 						},
 					},
 					Volumes: []apiv1.Volume{
 						{
-							Name: ConfigVolumeName,
+							Name: ConfigVolumeName, //将配置文件挂在容器的ConfMountPath下
 							VolumeSource: apiv1.VolumeSource{
 								ConfigMap: &apiv1.ConfigMapVolumeSource{
 									LocalObjectReference: apiv1.LocalObjectReference{

@@ -3,7 +3,7 @@ package controller
 import (
 	"time"
 
-	redisclient "github.com/jw-s/redis-operator/pkg/generated/clientset/typed/redis/v1"
+	redisclient "github.com/jw-s/redis-operator/pkg/generated/clientset/versioned/typed/redis/v1"
 	redisinformer "github.com/jw-s/redis-operator/pkg/generated/informers/externalversions/redis/v1"
 	redislister "github.com/jw-s/redis-operator/pkg/generated/listers/redis/v1"
 	"github.com/jw-s/redis-operator/pkg/operator/redis"
@@ -164,7 +164,7 @@ func (c *RedisController) process(key string) error {
 		return err
 	}
 
-	obj, err := c.redisLister.Redises(ns).Get(name)
+	obj, err := c.redisLister.Redises(ns).Get(name) //期望状态
 
 	if err != nil {
 
@@ -208,7 +208,7 @@ func (c *RedisController) process(key string) error {
 
 	}
 
-	myRedis.Redis = redisCopy
+	myRedis.Redis = redisCopy //更新期望
 
 	if err := c.reconcile(myRedis); err != nil {
 		return errors.NewAggregate([]error{

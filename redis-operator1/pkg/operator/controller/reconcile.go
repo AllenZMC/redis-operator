@@ -2,7 +2,9 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
+	"strings"
 
 	redisv1 "github.com/jw-s/redis-operator/pkg/apis/redis/v1"
 	"github.com/jw-s/redis-operator/pkg/errors"
@@ -40,29 +42,31 @@ func (c *RedisController) reconcile(redis *redis.Redis) error {
 
 		redis.SeedMasterProcessComplete = true
 
-	} else {
+	} else { //由于resync机制，所以默认一分钟后会触发更新事件，进入此分支
+		//先删除的话，哨兵可能获取不到master ip，这个时候master就是空，哨兵就会与redis集群断开了，不符合需求
+		//所以先获取master ip，再删除，等待下次的协调操作获取到选举出来的master ip
 		ip, err := util.GetMasterIPByName(redis.Config.RedisClient, spec.GetRedisMasterName(redis.Redis))
 
 		if err != nil || (util.GetSlaveCount(redis.Config.RedisClient, spec.GetRedisMasterName(redis.Redis)) == 0) {
 			// Something went wrong, mark to spin up seed pod on next run
-			redis.SeedMasterProcessComplete = false
+			redis.SeedMasterProcessComplete = false //重新创建种子节点0
 			return err
 		}
 
 		masterIP = ip
 
 		deletePolicy := v1.DeletePropagationForeground
-
+		//干掉seed master，由哨兵选举某个slave为新的master
 		err = c.kubernetesClient.CoreV1().Pods(redis.Redis.Namespace).Delete(spec.GetMasterPodName(redis.Redis.Name),
 			&metav1.DeleteOptions{
 				PropagationPolicy: &deletePolicy,
 			})
-
-		if err != nil && !util.ResourceNotFoundError(err) {
+		//master pod 没有删除掉，是其他类型的错误
+		if err != nil && !util.ResourceNotFoundError(err) { //不管删除还是查找，如果没有资源，都会报资源不存在错误
 			redis.SeedMasterDeleted = false
 			return err
 		}
-
+		//master pod 删除了
 		if !redis.SeedMasterDeleted {
 			if err := redis.MarkRemoveSeedMasterCondition(); err != nil {
 				return err
@@ -89,6 +93,10 @@ func (c *RedisController) reconcile(redis *redis.Redis) error {
 	}
 
 	if err := c.sentinelProcess(redis.Redis); err != nil {
+		return err
+	}
+
+	if err := c.redisConfigProcess(redis.Redis); err != nil {
 		return err
 	}
 
@@ -145,6 +153,69 @@ func (c *RedisController) sentinelConfigProcess(redis *redisv1.Redis) error {
 		}
 
 		return err
+	}
+	//更新哨兵配置（使用sentinel set mymaster）
+	sentinels, err := util.GetIPs(c.GetDeploymentPods, redis, spec.GetSentinelDeploymentName(redis.Name))
+	if err != nil {
+		return err
+	}
+	for _, sip := range sentinels {
+		if err := util.SetCustomSentinelConfig(sip, redis.Spec.Sentinels.CustomConfig, redis.Name); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *RedisController) GetDeploymentPods(namespace, name string) (*apiv1.PodList, error) {
+	deployment, err := c.deploymentLister.Deployments(namespace).Get(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.GetPods(deployment.Spec.Selector.MatchLabels, namespace)
+}
+
+func (c *RedisController) GetPods(matchLabels map[string]string, namespace string) (*apiv1.PodList, error) {
+	labels := make([]string, 0)
+	for k, v := range matchLabels {
+		labels = append(labels, fmt.Sprintf("%s=%s", k, v))
+	}
+	selector := strings.Join(labels, ",")
+	return c.kubernetesClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: selector})
+}
+
+func (c *RedisController) GetStatefulSetPods(namespace, name string) (*apiv1.PodList, error) {
+	statefulSet, err := c.statefulSetLister.StatefulSets(namespace).Get(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.GetPods(statefulSet.Spec.Selector.MatchLabels, namespace)
+}
+
+func (c *RedisController) redisConfigProcess(redis *redisv1.Redis) error {
+	configMapName := string(redis.Spec.Slaves.ConfigMap)
+
+	_, err := c.configMapLister.ConfigMaps(redis.Namespace).Get(configMapName)
+
+	if err != nil {
+		if util.ResourceNotFoundError(err) {
+			return util.CreateKubeResource(c.kubernetesClient, redis.Namespace, spec.DefaultRedisConfig(redis))
+		}
+
+		return err
+	}
+	//更新redis配置（使用config set）
+	redises, err := util.GetIPs(c.GetStatefulSetPods, redis, spec.GetSlaveStatefulSetName(redis.Name))
+	if err != nil {
+		return err
+	}
+	for _, rip := range redises {
+		if err := util.SetCustomRedisConfig(rip, redis.Spec.Slaves.CustomConfig); err != nil {
+			return err
+		}
 	}
 
 	return nil

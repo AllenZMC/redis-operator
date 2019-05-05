@@ -9,5 +9,7 @@ spec:
   sentinels:
     replicas: {{ .Values.redis.sentinels.replicas }}
     quorum: {{ .Values.redis.sentinels.quorum }}
+    customConfig: {{ .Values.redis.sentinels.customConfig }}
   slaves:
     replicas: {{ .Values.redis.slaves.replicas }}
+    customConfi: {{ .Values.redis.slaves.customConfig }}

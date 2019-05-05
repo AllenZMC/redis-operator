@@ -1,4 +1,5 @@
-FROM scratch
+#FROM scratch
+FROM alpine
 ADD bin/redis-operator /redis-operator
 ENTRYPOINT ["/redis-operator"]
 VOLUME ["/tmp"]

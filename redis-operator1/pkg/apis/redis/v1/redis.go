@@ -58,14 +58,18 @@ type ServerSpec struct {
 }
 
 type SentinelSpec struct {
-	Replicas  int32     `json:"replicas"`
-	Quorum    int32     `json:"quorum"`
-	ConfigMap ConfigMap `json:"configMap"`
+	Replicas     int32     `json:"replicas"`
+	Quorum       int32     `json:"quorum"`
+	ConfigMap    ConfigMap `json:"configMap"` //name
+	CustomConfig []string  `json:"customConfig,omitempty"`
+	//Command      []string  `json:"command,omitempty"`
 }
 
 type SlaveSpec struct {
-	Replicas  int32     `json:"replicas"`
-	ConfigMap ConfigMap `json:"configMap"`
+	Replicas     int32     `json:"replicas"`
+	ConfigMap    ConfigMap `json:"configMap"` //name
+	CustomConfig []string  `json:"customConfig,omitempty"`
+	//Command      []string  `json:"command,omitempty"`
 }
 
 type ConfigMap string
@@ -202,7 +206,7 @@ func (ss *ServerStatus) markCondition(sc ServerCondition) {
 	ss.Conditions = append(ss.Conditions, sc)
 }
 
-func (s *ServerSpec) ApplyDefaults(name string) {
+func (s *ServerSpec) ApplyDefaults(sentinelConfigName, redisConfigName string) {
 	if len(s.BaseImage) == 0 {
 		logrus.WithField("name", defaultBaseImage).
 			Warn("Using default image")
@@ -220,10 +224,16 @@ func (s *ServerSpec) ApplyDefaults(name string) {
 	}
 	if len(s.Sentinels.ConfigMap) == 0 {
 		logrus.
-			WithField("name", name).
+			WithField("name", sentinelConfigName).
 			Warn("Using Default ConfigMap")
 		logrus.Warn("This configMap will be created if it doesn't already exist.")
-		s.Sentinels.ConfigMap = ConfigMap(name)
+		s.Sentinels.ConfigMap = ConfigMap(sentinelConfigName)
+	}
+
+	if len(s.Slaves.ConfigMap) == 0 {
+		logrus.WithField("name", redisConfigName).Warn("Using Default ConfigMap")
+		logrus.Warn("This configMap will be created if it doesn't already exist.")
+		s.Slaves.ConfigMap = ConfigMap(redisConfigName)
 	}
 
 	if s.Pod == nil {

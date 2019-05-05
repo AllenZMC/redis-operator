@@ -21,7 +21,7 @@ func DefaultSentinelConfig(redis *v1.Redis) *apiv1.ConfigMap {
 			},
 		},
 		Data: map[string]string{
-			ConfigMapConfKeyName: defaultSentinelConfig(redis.Name, redis.Spec.Sentinels.Quorum),
+			sentinelConfigFileName: defaultSentinelConfig(redis.Name, redis.Spec.Sentinels.Quorum),
 		},
 	}
 }
@@ -39,4 +39,27 @@ sentinel failover-timeout %[2]s 180000`,
 		RedisPort,
 		quorum)
 
+}
+
+func GetRedisConfigMapName(name string) string {
+	return fmt.Sprintf(RedisConfigMapName, name)
+}
+
+func DefaultRedisConfig(redis *v1.Redis) *apiv1.ConfigMap {
+	redisConfigFileContent := `
+tcp-keepalive 60
+save 900 1
+save 300 10`
+	return &apiv1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      GetRedisConfigMapName(redis.Name),
+			Namespace: redis.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				redis.AsOwner(),
+			},
+		},
+		Data: map[string]string{
+			redisConfigFileName: redisConfigFileContent,
+		},
+	}
 }

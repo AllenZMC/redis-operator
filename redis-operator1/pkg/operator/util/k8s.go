@@ -1,6 +1,7 @@
 package util
 
 import (
+	redisv1 "github.com/jw-s/redis-operator/pkg/apis/redis/v1"
 	rediserrors "github.com/jw-s/redis-operator/pkg/errors"
 	appsv1beta1 "k8s.io/api/apps/v1beta1"
 	apiv1 "k8s.io/api/core/v1"
@@ -101,4 +102,21 @@ func CreateKubeResource(kubeClient kubernetes.Interface, namespace string, obj r
 	}
 
 	return
+}
+
+// GetIPs returns the IPs of the Sentinel or redis nodes
+type GetPods func(namespace, name string) (*apiv1.PodList, error)
+
+func GetIPs(getPods GetPods, redis *redisv1.Redis, name string) ([]string, error) {
+	podIPs := make([]string, 0)
+	rps, err := getPods(redis.Namespace, name)
+	if err != nil {
+		return nil, err
+	}
+	for _, sp := range rps.Items {
+		if sp.Status.Phase == apiv1.PodRunning { // Only work with running pods
+			podIPs = append(podIPs, sp.Status.PodIP)
+		}
+	}
+	return podIPs, nil
 }

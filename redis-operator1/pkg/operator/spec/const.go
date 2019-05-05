@@ -11,9 +11,11 @@ const (
 	SlavePersistentVolumeClaimName = "slave-persistent-storage"
 	OperatorLabel                  = "redis_operator"
 	SentinelConfigMapName          = "sentinel-config-%s"
+	RedisConfigMapName             = "redis-config-%s"
 	ConfigVolumeName               = "config"
 	DataVolumeName                 = "data"
-	ConfigMapConfKeyName           = "redis.conf"
+	sentinelConfigFileName         = "sentinel.conf"
+	redisConfigFileName            = "redis.conf"
 	ConfMountPath                  = "/usr/local/etc/redis"
 	DataMountPath                  = "/data"
 )

@@ -2,12 +2,18 @@ package util
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis"
 	"github.com/jw-s/redis-operator/pkg/operator/spec"
 	"github.com/sirupsen/logrus"
 	v1lister "k8s.io/client-go/listers/core/v1"
+)
+
+const (
+	redisPort    = "6379"
+	sentinelPort = "26379"
 )
 
 func GetMasterIPByName(client *redis.Client, name string) (string, error) {
@@ -111,4 +117,67 @@ func NewSentinelRedisClient(name string) *redis.Client {
 		DialTimeout:     time.Second * 30,
 		MinRetryBackoff: time.Second * 30,
 	})
+}
+
+//哨兵
+func SetCustomSentinelConfig(ip string, configs []string, masterName string) error {
+	options := &redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", ip, sentinelPort),
+		Password: "",
+		DB:       0,
+	}
+	rClient := redis.NewClient(options)
+	defer rClient.Close()
+
+	for _, config := range configs {
+		param, value, err := getConfigParameters(config)
+		if err != nil {
+			return err
+		}
+		if err := applySentinelConfig(param, value, masterName, rClient); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func applySentinelConfig(parameter, value, masterName string, rClient *redis.Client) error {
+	cmd := redis.NewStatusCmd("SENTINEL", "set", masterName, parameter, value)
+	rClient.Process(cmd)
+	return cmd.Err()
+}
+
+//redis
+func SetCustomRedisConfig(ip string, configs []string) error {
+	options := &redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", ip, redisPort),
+		Password: "",
+		DB:       0,
+	}
+	rClient := redis.NewClient(options)
+	defer rClient.Close()
+
+	for _, config := range configs {
+		param, value, err := getConfigParameters(config)
+		if err != nil {
+			return err
+		}
+		if err := applyRedisConfig(param, value, rClient); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func applyRedisConfig(parameter string, value string, rClient *redis.Client) error {
+	result := rClient.ConfigSet(parameter, value)
+	return result.Err()
+}
+
+func getConfigParameters(config string) (parameter string, value string, err error) {
+	s := strings.Split(config, " ")
+	if len(s) < 2 {
+		return "", "", fmt.Errorf("configuration '%s' malformed", config)
+	}
+	return s[0], strings.Join(s[1:], " "), nil
 }

@@ -24,6 +24,9 @@ func SlaveStatefulSet(owner *v1.Redis) *appsv1beta1.StatefulSet {
 		Spec: appsv1beta1.StatefulSetSpec{
 			ServiceName: GetSlaveStatefulSetName(owner.Name),
 			Replicas:    &replicas,
+			UpdateStrategy: appsv1beta1.StatefulSetUpdateStrategy{
+				Type: "RollingUpdate",
+			},
 			Template: apiv1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      GetSlaveStatefulSetName(owner.Name),
@@ -53,6 +56,7 @@ func SlaveStatefulSet(owner *v1.Redis) *appsv1beta1.StatefulSet {
 							apiv1.ReadWriteOnce,
 						},
 						Resources: owner.Spec.Pod.Resources,
+						//StorageClassName:, //如果没有设置，需要在集群中设置默认的StorageClass
 					},
 				},
 			},

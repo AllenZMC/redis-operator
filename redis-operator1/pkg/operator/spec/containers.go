@@ -52,8 +52,8 @@ func RedisSentinel(container apiv1.Container) apiv1.Container {
 
 	container.VolumeMounts = GetVolumeMounts()
 
-	container.Args = append([]string{
-		fmt.Sprintf("%s/%s", DataMountPath, ConfigMapConfKeyName),
+	container.Args = append([]string{ //启动哨兵
+		fmt.Sprintf("%s/%s", DataMountPath, sentinelConfigFileName),
 		"--sentinel",
 	},
 		container.Args...,
