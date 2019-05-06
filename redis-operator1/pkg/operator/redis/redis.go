@@ -2,6 +2,7 @@ package redis
 
 import (
 	"fmt"
+	"github.com/jw-s/redis-operator/pkg/operator/util"
 
 	"github.com/go-redis/redis"
 	"github.com/jw-s/redis-operator/pkg/apis/redis/v1"
@@ -30,7 +31,7 @@ type Redis struct {
 
 func New(config Config, redis *v1.Redis) *Redis {
 	newRedis := &Redis{
-		logger: logrus.WithFields(logrus.Fields{"pkg": "redis", "queue_item": redis.Name}),
+		logger: util.Logger.WithFields(logrus.Fields{"pkg": "redis", "queue_item": redis.Name}),
 		Config: config,
 	}
 

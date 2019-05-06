@@ -11,7 +11,6 @@ import (
 	redisinformers "github.com/jw-s/redis-operator/pkg/generated/informers/externalversions"
 	"github.com/jw-s/redis-operator/pkg/operator/controller"
 	"github.com/jw-s/redis-operator/pkg/operator/util"
-	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -27,8 +26,7 @@ var (
 )
 
 func init() {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logrus.SetOutput(os.Stdout)
+	util.NewLogger()
 }
 
 func main() {
@@ -55,7 +53,7 @@ func main() {
 
 func run() {
 
-	toggleDebug(debug)
+	util.ToggleDebug(debug)
 
 	doneChan := make(chan struct{})
 
@@ -104,16 +102,10 @@ func run() {
 	for {
 		select {
 		case <-signalChan:
-			logrus.Info("Shutdown signal received, exiting...")
+			util.Logger.Info("Shutdown signal received, exiting...")
 			close(doneChan)
 			os.Exit(0)
 		}
 	}
 
-}
-
-func toggleDebug(toggleDebugMode bool) {
-	if toggleDebugMode {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
 }

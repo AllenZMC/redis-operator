@@ -78,7 +78,7 @@ func New(cfg Config,
 	}
 
 	c := &RedisController{
-		logger:            logrus.WithField("pkg", "controller"),
+		logger:            util.Logger.WithField("pkg", "controller"),
 		Config:            cfg,
 		kubernetesClient:  kubernetesClient,
 		redisClient:       redisClient,

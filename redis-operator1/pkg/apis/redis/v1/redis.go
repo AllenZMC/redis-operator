@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"github.com/sirupsen/logrus"
+	"github.com/jw-s/redis-operator/pkg/operator/util"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -208,37 +208,35 @@ func (ss *ServerStatus) markCondition(sc ServerCondition) {
 
 func (s *ServerSpec) ApplyDefaults(sentinelConfigName, redisConfigName string) {
 	if len(s.BaseImage) == 0 {
-		logrus.WithField("name", defaultBaseImage).
+		util.Logger.WithField("name", defaultBaseImage).
 			Warn("Using default image")
 		s.BaseImage = defaultBaseImage
 	}
 
 	if len(s.Version) == 0 {
-		logrus.WithField("version", defaultVersion).
+		util.Logger.WithField("version", defaultVersion).
 			Warn("Using default image version")
 		s.Version = defaultVersion
 	}
 
 	if s.Sentinels.Replicas != 0 && s.Sentinels.Replicas%2 == 0 {
-		logrus.Warn("Redis sentinels should be an odd number to prevent ties!")
+		util.Logger.Warn("Redis sentinels should be an odd number to prevent ties!")
 	}
 	if len(s.Sentinels.ConfigMap) == 0 {
-		logrus.
-			WithField("name", sentinelConfigName).
+		util.Logger.WithField("name", sentinelConfigName).
 			Warn("Using Default ConfigMap")
-		logrus.Warn("This configMap will be created if it doesn't already exist.")
+		util.Logger.Warn("This configMap will be created if it doesn't already exist.")
 		s.Sentinels.ConfigMap = ConfigMap(sentinelConfigName)
 	}
 
 	if len(s.Slaves.ConfigMap) == 0 {
-		logrus.WithField("name", redisConfigName).Warn("Using Default ConfigMap")
-		logrus.Warn("This configMap will be created if it doesn't already exist.")
+		util.Logger.WithField("name", redisConfigName).Warn("Using Default ConfigMap")
+		util.Logger.Warn("This configMap will be created if it doesn't already exist.")
 		s.Slaves.ConfigMap = ConfigMap(redisConfigName)
 	}
 
 	if s.Pod == nil {
-		logrus.
-			WithField("size", defaultPVSize).
+		util.Logger.WithField("size", defaultPVSize).
 			Warn("Using default size for PV")
 		s.Pod = &PodPolicy{
 			Resources: v1.ResourceRequirements{
@@ -257,7 +255,7 @@ func (s *ServerSpec) GetRedisRunAsUser() (runAsPointer *int64) {
 	var defaultRedisRunAsUser int64 = 100
 	runAsPointer = &runAs
 	if s.BaseImage == defaultBaseImage {
-		logrus.WithField("uid", defaultRedisRunAsUser).
+		util.Logger.WithField("uid", defaultRedisRunAsUser).
 			Debug("Using default redis user")
 		runAsPointer = &defaultRedisRunAsUser
 	}
