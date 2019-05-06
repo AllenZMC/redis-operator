@@ -5,6 +5,7 @@ metadata:
   name: redises.operator.joelws.com
   annotations:
     helm.sh/hook: crd-install
+  namespace: {{ .Release.Namespace }}
 spec:
   # group name to use for REST API: /apis/<group>/<version>
   group: operator.joelws.com

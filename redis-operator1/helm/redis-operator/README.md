@@ -4,7 +4,7 @@ This chart installs redis-operator in your cluster.
 
 ## Prerequisites
 
-* Kubernetes 1.7+
+* Kubernetes 1.12+
 * Tiller v2.8+
 
 ## Chart details
@@ -25,14 +25,19 @@ The following tables lists the configurable parameters of the redis-operator cha
 | `redis.sentinels.quorum`       | The number of Sentinels that need to agree about the fact the master is not reachable | `2` |
 | `redis.slaves.replicas`  | Redis slave replica count | `3` |
 | **Image** |
-| `image.repository` | Image repository used for redis operator | `joelws/redis-operator` |
-| `image.tag` | Tag used for redis operator | `0.1.1` |
+| `image.repository` | Image repository used for redis operator | `allenczm/redis-operator` |
+| `image.tag` | Tag used for redis operator | `0.1.5` |
 | `image.pullPolicy` | Image pull policy | `Always` |
 
 ## Installing the chart
 
 ```
-helm install -n redis .
+helm install -n redis --namespace redis-operator .
+```
+
+## Upgrade the chart
+```
+helm upgrade redis -f values.yaml
 ```
 
 ## Removing the chart

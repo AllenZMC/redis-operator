@@ -17,8 +17,8 @@ redis:
       - "client-output-buffer-limit pubsub 33554432 8388608 60"
 
 image:
-  repository: joelws/redis-operator
-  tag: 0.1.3
+  repository: allenczm/redis-operator
+  tag: 0.1.5
   pullPolicy: Always
 
 resources:

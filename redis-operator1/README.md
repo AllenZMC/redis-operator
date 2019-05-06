@@ -10,7 +10,7 @@ The *Redis* operator manages redis servers deployed to *Kubernetes* and automate
 
 ## Requirements
 
-- Kubernetes 1.7+
+- Kubernetes 1.12+
 
 ## Demo
 

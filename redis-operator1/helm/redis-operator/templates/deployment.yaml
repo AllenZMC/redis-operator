@@ -2,6 +2,7 @@ apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: {{ include "redis-operator.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "redis-operator.name" . }}
     chart: {{ include "redis-operator.chart" . }}
