@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"github.com/jw-s/redis-operator/pkg/operator"
 	"strings"
 	"time"
 
@@ -32,7 +33,7 @@ func GetMasterIPByName(client *redis.Client, name string) (string, error) {
 		return "", err
 	}
 
-	Logger.WithFields(logrus.Fields{"master_ip": masterAddr[0],
+	operator.Logger.WithFields(logrus.Fields{"master_ip": masterAddr[0],
 		"master_port": masterAddr[1]}).
 		Debug("Master IP reported from sentinel(s)")
 
@@ -65,7 +66,7 @@ func GetSeedMasterIP(podLister v1lister.PodLister, namespace, name string) (stri
 		return "", err
 	}
 
-	Logger.WithField("master_ip", masterIP).
+	operator.Logger.WithField("master_ip", masterIP).
 		Debug("Got seed master IP")
 
 	return masterIP, nil
@@ -78,14 +79,14 @@ func GetSlaveCount(client *redis.Client, name string) int {
 	err := client.Process(cmd)
 
 	if err != nil {
-		Logger.Error(err.Error())
+		operator.Logger.Error(err.Error())
 		return count
 	}
 
 	result, err := cmd.Result()
 
 	if err != nil {
-		Logger.Error(err.Error())
+		operator.Logger.Error(err.Error())
 		return count
 	}
 
@@ -95,7 +96,7 @@ func GetSlaveCount(client *redis.Client, name string) int {
 		}
 	}
 
-	Logger.WithField("count", count).
+	operator.Logger.WithField("count", count).
 		Debug("slaves avaliable")
 
 	return count
@@ -161,25 +162,25 @@ func SetCustomRedisConfig(ip string, configs []string) error {
 			return err
 		}
 		result := rClient.ConfigGet(param)
-		Logger.Debug(result)
+		operator.Logger.Debug(result)
 	}
 	return nil
 }
 
 func applyRedisConfig(parameter string, value string, rClient *redis.Client) error {
 	result := rClient.ConfigSet(parameter, value)
-	Logger.Error("applyRedisConfig: ", result.Err())
+	operator.Logger.Error("applyRedisConfig: ", result.Err())
 	return result.Err()
 }
 
 func getConfigParameters(config string) (parameter string, value string, err error) {
 	s := strings.Split(config, " ")
-	Logger.Debug(s)
+	operator.Logger.Debug(s)
 
 	if len(s) < 2 {
 		return "", "", fmt.Errorf("configuration '%s' malformed", config)
 	}
-	Logger.Debug(s[0], strings.Join(s[1:], " "))
+	operator.Logger.Debug(s[0], strings.Join(s[1:], " "))
 
 	return s[0], strings.Join(s[1:], " "), nil
 }

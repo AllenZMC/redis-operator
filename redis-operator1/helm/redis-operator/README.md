@@ -45,6 +45,7 @@ helm upgrade redis -f values.yaml
 1. Delete all the redis resources, this will ensure that the operator will delete all the resources it created
     ```
     kubectl delete redis -n redis-operator --all
+    kubectl delete crd redises.operator.joelws.com
     ```
 2. Remove the chart.
     ```

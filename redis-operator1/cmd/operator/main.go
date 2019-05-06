@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/jw-s/redis-operator/pkg/operator"
 	"os"
 	"os/signal"
 	"syscall"
@@ -26,7 +27,7 @@ var (
 )
 
 func init() {
-	util.NewLogger()
+	operator.NewLogger()
 }
 
 func main() {
@@ -53,7 +54,7 @@ func main() {
 
 func run() {
 
-	util.ToggleDebug(debug)
+	operator.ToggleDebug(debug)
 
 	doneChan := make(chan struct{})
 
@@ -102,7 +103,7 @@ func run() {
 	for {
 		select {
 		case <-signalChan:
-			util.Logger.Info("Shutdown signal received, exiting...")
+			operator.Logger.Info("Shutdown signal received, exiting...")
 			close(doneChan)
 			os.Exit(0)
 		}

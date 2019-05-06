@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/jw-s/redis-operator/pkg/operator"
 	"time"
 
 	redisclient "github.com/jw-s/redis-operator/pkg/generated/clientset/versioned/typed/redis/v1"
@@ -78,7 +79,7 @@ func New(cfg Config,
 	}
 
 	c := &RedisController{
-		logger:            util.Logger.WithField("pkg", "controller"),
+		logger:            operator.Logger.WithField("pkg", "controller"),
 		Config:            cfg,
 		kubernetesClient:  kubernetesClient,
 		redisClient:       redisClient,
