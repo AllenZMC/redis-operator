@@ -29,15 +29,20 @@ The following tables lists the configurable parameters of the redis-operator cha
 | `image.tag` | Tag used for redis operator | `0.1.5` |
 | `image.pullPolicy` | Image pull policy | `Always` |
 
+## Debug the chart
+```
+helm install --dry-run --debug .
+```
+
 ## Installing the chart
 
 ```
 helm install -n redis --namespace redis-operator .
 ```
 
-## Upgrade the chart
+## Edit the CR Redis yaml
 ```
-helm upgrade redis -f values.yaml
+kubectl edit Redis redis-default -n redis-operator
 ```
 
 ## Removing the chart

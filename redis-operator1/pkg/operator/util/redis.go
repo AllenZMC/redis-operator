@@ -125,7 +125,10 @@ func SetCustomSentinelConfig(ip string, configs []string, masterName string) err
 	rClient := redis.NewClient(options)
 	defer rClient.Close()
 
+	operator.Logger.Debug("Sentinel config slice is: ", configs, "len is: ", len(configs))
+
 	for _, config := range configs {
+		operator.Logger.Debug("Sentinel config str is: ", config)
 		param, value, err := getConfigParameters(config)
 		if err != nil {
 			return err
@@ -139,12 +142,15 @@ func SetCustomSentinelConfig(ip string, configs []string, masterName string) err
 
 func applySentinelConfig(parameter, value, masterName string, rClient *redis.Client) error {
 	cmd := redis.NewStatusCmd("SENTINEL", "set", masterName, parameter, value)
-	rClient.Process(cmd)
+	if err := rClient.Process(cmd); err != nil {
+		operator.Logger.Error("applySentinelConfig err: ", err)
+	}
 	return cmd.Err()
 }
 
 //redis
 func SetCustomRedisConfig(ip string, configs []string) error {
+
 	options := &redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", ip, redisPort),
 		Password: "",
@@ -153,7 +159,10 @@ func SetCustomRedisConfig(ip string, configs []string) error {
 	rClient := redis.NewClient(options)
 	defer rClient.Close()
 
+	operator.Logger.Debug("Redis config slice is: ", configs)
+
 	for _, config := range configs {
+		operator.Logger.Debug("Redis config str is: ", config)
 		param, value, err := getConfigParameters(config)
 		if err != nil {
 			return err
@@ -161,26 +170,27 @@ func SetCustomRedisConfig(ip string, configs []string) error {
 		if err := applyRedisConfig(param, value, rClient); err != nil {
 			return err
 		}
-		result := rClient.ConfigGet(param)
-		operator.Logger.Debug(result)
 	}
 	return nil
 }
 
 func applyRedisConfig(parameter string, value string, rClient *redis.Client) error {
 	result := rClient.ConfigSet(parameter, value)
-	operator.Logger.Error("applyRedisConfig: ", result.Err())
+	if result.Err() != nil {
+		operator.Logger.Error("applyRedisConfig err: ", result.Err())
+	}
+
 	return result.Err()
 }
 
 func getConfigParameters(config string) (parameter string, value string, err error) {
 	s := strings.Split(config, " ")
-	operator.Logger.Debug(s)
+	operator.Logger.Debug("config split is: ", s)
 
 	if len(s) < 2 {
 		return "", "", fmt.Errorf("configuration '%s' malformed", config)
 	}
-	operator.Logger.Debug(s[0], strings.Join(s[1:], " "))
+	operator.Logger.Debug(s[0], "/", strings.Join(s[1:], " "))
 
 	return s[0], strings.Join(s[1:], " "), nil
 }
