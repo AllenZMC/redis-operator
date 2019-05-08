@@ -7,7 +7,7 @@ all: build push clean
 
 build: bin/redis
 	docker build -t $(REDIS_OPERATOR_IMAGE_NAME):$(VERSION) -f ./Dockerfile_prod .
-	docker tag $(REDIS_OPERATOR_IMAGE_NAME):$(VERSION) $(REDIS_OPERATOR_IMAGE_NAME):latest
+	#docker tag $(REDIS_OPERATOR_IMAGE_NAME):$(VERSION) $(REDIS_OPERATOR_IMAGE_NAME):latest
 
 bin/redis:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/redis-operator -ldflags "-X main.commit=${COMMIT} -X main.version=${VERSION}" ./cmd/operator

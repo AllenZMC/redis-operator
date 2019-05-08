@@ -4,6 +4,10 @@ redis:
     quorum: 2
   slaves:
     replicas: 3
+    customConfig:
+      - "client-output-buffer-limit normal 0 0 0"
+      - "client-output-buffer-limit slave 1000000000 1000000000 0"
+      - "client-output-buffer-limit pubsub 33554432 8388608 60"
 
 image:
   repository: allenczm/redis-operator

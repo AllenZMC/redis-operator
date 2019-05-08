@@ -2,6 +2,7 @@ package spec
 
 import (
 	"fmt"
+	"github.com/jw-s/redis-operator/pkg/operator"
 
 	cr "github.com/jw-s/redis-operator/pkg/apis/redis/v1"
 	apiv1 "k8s.io/api/core/v1"
@@ -51,7 +52,7 @@ func MasterService(owner *cr.Redis) *apiv1.Service {
 }
 
 func MasterServiceEndpoint(owner *cr.Redis, IPAddress string) *apiv1.Endpoints {
-
+	operator.Logger.Debugf("MasterServiceEndpoint: %v", IPAddress)
 	return &apiv1.Endpoints{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      GetMasterServiceName(owner.Name),

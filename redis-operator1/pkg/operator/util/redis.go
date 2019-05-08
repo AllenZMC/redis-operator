@@ -91,8 +91,7 @@ func GetSlaveCount(client *redis.Client, name string) int {
 	}
 
 	for _, slaveBlob := range result {
-		operator.Logger.
-			Debug("slave info: ", slaveBlob)
+		//operator.Logger.Debug("slave info: ", slaveBlob)
 		if _, ok := slaveBlob.([]interface{}); ok {
 			count++
 		}

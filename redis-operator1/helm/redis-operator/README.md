@@ -45,6 +45,7 @@ helm install -n redis --namespace redis-operator .
 kubectl edit Redis redis-default -n redis-operator
 ```
 
+
 ## Removing the chart
 
 1. Delete all the redis resources, this will ensure that the operator will delete all the resources it created

@@ -11,3 +11,7 @@ spec:
     quorum: {{ .Values.redis.sentinels.quorum }}
   slaves:
     replicas: {{ .Values.redis.slaves.replicas }}
+    customConfig:
+     {{- range .Values.redis.slaves.customConfig }}
+     - {{ . }}
+     {{- end}}
