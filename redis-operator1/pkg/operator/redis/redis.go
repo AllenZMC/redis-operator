@@ -12,8 +12,10 @@ import (
 )
 
 const (
-	ReportingPhaseMessage = "Updating phase"
-	PhaseKey              = "Phase"
+	ReportingPhaseMessage     = "Updating phase"
+	PhaseKey                  = "Phase"
+	Condition                 = "Conditions"
+	ReportingConditionMessage = "Updating Conditions"
 )
 
 type Config struct {
@@ -92,15 +94,21 @@ func (r *Redis) ReportStopping() error {
 
 func (r *Redis) MarkReadyCondition() error {
 	r.Redis.Status.MarkReadyCondition()
+	r.logger.WithField(Condition, v1.ServerConditionReady).
+		Debug(ReportingConditionMessage)
 	return r.UpdateRedisStatus()
 }
 
 func (r *Redis) MarkAddSeedMasterCondition() error {
 	r.Redis.Status.MarkAddSeedMasterCondition()
+	r.logger.WithField(Condition, v1.ServerConditionAddSeedMaster).
+		Debug(ReportingConditionMessage)
 	return r.UpdateRedisStatus()
 }
 
 func (r *Redis) MarkRemoveSeedMasterCondition() error {
 	r.Redis.Status.MarkRemoveSeedMasterCondition()
+	r.logger.WithField(Condition, v1.ServerConditionRemoveSeedMaster).
+		Debug(ReportingConditionMessage)
 	return r.UpdateRedisStatus()
 }

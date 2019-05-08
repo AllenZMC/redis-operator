@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jw-s/redis-operator/pkg/operator"
 	"reflect"
 	"strings"
 
@@ -44,12 +45,13 @@ func (c *RedisController) reconcile(redis *redis.Redis) error {
 
 	} else { //由于resync机制，所以默认一分钟后会触发更新事件，进入此分支
 		//先删除的话，哨兵可能获取不到master ip，这个时候master就是空，哨兵就会与redis集群断开了，不符合需求
-		//所以先获取master ip，再删除，等待下次的协调操作获取到选举出来的master ip
+		//所以先获取master ip，再删除，等待哨兵选举出来新的master
 		ip, err := util.GetMasterIPByName(redis.Config.RedisClient, spec.GetRedisMasterName(redis.Redis))
 
 		if err != nil || (util.GetSlaveCount(redis.Config.RedisClient, spec.GetRedisMasterName(redis.Redis)) == 0) {
 			// Something went wrong, mark to spin up seed pod on next run
 			redis.SeedMasterProcessComplete = false //重新创建种子节点0
+			operator.Logger.Error("GetMasterIPByName err: ", err)
 			return err
 		}
 
@@ -196,17 +198,18 @@ func (c *RedisController) GetStatefulSetPods(namespace, name string) (*apiv1.Pod
 }
 
 func (c *RedisController) redisConfigProcess(redis *redisv1.Redis) error {
+	//只为了第一次创建operator时，跳过更新config操作
 	configMapName := string(redis.Spec.Slaves.ConfigMap)
-
 	_, err := c.configMapLister.ConfigMaps(redis.Namespace).Get(configMapName)
 
 	if err != nil {
 		if util.ResourceNotFoundError(err) {
-			return util.CreateKubeResource(c.kubernetesClient, redis.Namespace, spec.DefaultRedisConfig(redis))
+			return nil
+			//return util.CreateKubeResource(c.kubernetesClient, redis.Namespace, spec.DefaultRedisConfig(redis))
 		}
-
 		return err
 	}
+
 	//更新redis配置（使用config set）
 	redises, err := util.GetIPs(c.GetStatefulSetPods, redis, spec.GetSlaveStatefulSetName(redis.Name))
 	if err != nil {

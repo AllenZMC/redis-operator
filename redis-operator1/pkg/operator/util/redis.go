@@ -79,18 +79,20 @@ func GetSlaveCount(client *redis.Client, name string) int {
 	err := client.Process(cmd)
 
 	if err != nil {
-		operator.Logger.Error(err.Error())
+		operator.Logger.Error("GetSlaveCount err: ", err.Error())
 		return count
 	}
 
 	result, err := cmd.Result()
 
 	if err != nil {
-		operator.Logger.Error(err.Error())
+		operator.Logger.Error("GetSlaveCount err: ", err.Error())
 		return count
 	}
 
 	for _, slaveBlob := range result {
+		operator.Logger.
+			Debug("slave info: ", slaveBlob)
 		if _, ok := slaveBlob.([]interface{}); ok {
 			count++
 		}
@@ -125,7 +127,7 @@ func SetCustomSentinelConfig(ip string, configs []string, masterName string) err
 	rClient := redis.NewClient(options)
 	defer rClient.Close()
 
-	operator.Logger.Debug("Sentinel config slice is: ", configs, "len is: ", len(configs))
+	operator.Logger.Debug("Sentinel config slice is: ", configs, " ,len is: ", len(configs))
 
 	for _, config := range configs {
 		operator.Logger.Debug("Sentinel config str is: ", config)
@@ -185,7 +187,6 @@ func applyRedisConfig(parameter string, value string, rClient *redis.Client) err
 
 func getConfigParameters(config string) (parameter string, value string, err error) {
 	s := strings.Split(config, " ")
-	operator.Logger.Debug("config split is: ", s)
 
 	if len(s) < 2 {
 		return "", "", fmt.Errorf("configuration '%s' malformed", config)

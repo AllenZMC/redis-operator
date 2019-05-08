@@ -36,7 +36,8 @@ func MasterService(owner *cr.Redis) *apiv1.Service {
 			},
 		},
 		Spec: apiv1.ServiceSpec{
-			Type: apiv1.ServiceTypeClusterIP,
+			//Type: apiv1.ServiceTypeClusterIP,
+			Type: apiv1.ServiceTypeNodePort,
 			Ports: []apiv1.ServicePort{
 				{
 					Protocol:   apiv1.ProtocolTCP,
@@ -89,7 +90,8 @@ func SentinelService(owner *cr.Redis) *apiv1.Service {
 			},
 		},
 		Spec: apiv1.ServiceSpec{
-			Type: apiv1.ServiceTypeClusterIP,
+			//Type: apiv1.ServiceTypeClusterIP,
+			Type: apiv1.ServiceTypeNodePort,
 			Ports: []apiv1.ServicePort{
 				{
 					Protocol:   apiv1.ProtocolTCP,

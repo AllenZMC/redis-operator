@@ -7,7 +7,6 @@ import (
 	"syscall"
 	"time"
 
-	"fmt"
 	client "github.com/jw-s/redis-operator/pkg/generated/clientset/versioned"
 	redisinformers "github.com/jw-s/redis-operator/pkg/generated/informers/externalversions"
 	"github.com/jw-s/redis-operator/pkg/operator/controller"
@@ -19,8 +18,6 @@ import (
 
 var (
 	name        = "redis-operator"
-	commit      string
-	version     string
 	description = "The Redis operator manages redis servers deployed to Kubernetes and automates tasks related to operating a Redis server setup."
 	resync      time.Duration
 	debug       bool
@@ -35,7 +32,6 @@ func main() {
 	app.Name = name
 	app.Usage = description
 	app.Action = func(c *cli.Context) { run() }
-	app.Version = fmt.Sprintf("%s (%s)", version, commit)
 	app.Flags = []cli.Flag{
 		cli.DurationFlag{
 			Name:        "resync,re",

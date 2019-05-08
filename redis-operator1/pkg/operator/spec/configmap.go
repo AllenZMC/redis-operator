@@ -48,7 +48,6 @@ func GetRedisConfigMapName(name string) string {
 func DefaultRedisConfig(redis *v1.Redis) *apiv1.ConfigMap {
 	redisConfigFileContent := `
 tcp-keepalive 60
-save 900 1
 save 300 10`
 	return &apiv1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{

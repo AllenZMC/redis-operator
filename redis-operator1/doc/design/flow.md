@@ -21,11 +21,11 @@
 
 ## Updated
 
-1.  Deletes Seed Master Pod as no longer required as slaves now exist
-2.  Queries Sentinel for current master IP Address
+1.  Queries Sentinel for current master IP Address
+2.  Deletes Seed Master Pod as no longer required as slaves now exist
 3.  Updates *Endpoints* with retrieved master IP
 5.  Updates secondary resources with new CRD state (reconcile)
-
+6.  The sentinels elect a new master using the slaves 
 
 ## Deleted
 

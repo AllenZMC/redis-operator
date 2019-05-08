@@ -18,7 +18,7 @@ install-deps:
 
 push:
 	docker push $(REDIS_OPERATOR_IMAGE_NAME):$(VERSION)
-	docker push $(REDIS_OPERATOR_IMAGE_NAME):latest
+	#docker push $(REDIS_OPERATOR_IMAGE_NAME):latest
 
 clean:
 	rm -rf bin/
