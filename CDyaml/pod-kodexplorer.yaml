@@ -5,7 +5,7 @@ metadata:
   labels:
     app: kod-explorer
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: kod-explorer
@@ -27,7 +27,7 @@ spec:
             name: nginxconf  
         resources: {}
       - image: allenczm/kod:v1
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         name: php
         resources: {}  
         env:
