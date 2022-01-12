@@ -35,9 +35,6 @@ spec:
           value: "123456"
         ports:
           - containerPort: 9000
-        volumeMounts:
-          - mountPath: /var/www/html
-            name: phpdata
       dnsPolicy: ClusterFirst
       volumes:
         - name: phpdata
