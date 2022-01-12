@@ -30,6 +30,9 @@ spec:
         imagePullPolicy: IfNotPresent
         name: php
         resources: {}  
+        env:
+        - name: PASSWORD
+          value: "123456"
         ports:
           - containerPort: 9000
         volumeMounts:
