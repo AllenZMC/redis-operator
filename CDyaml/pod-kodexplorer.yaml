@@ -33,7 +33,7 @@ spec:
         lifecycle:
           postStart:
             exec:
-              command: ["/bin/sh", "-c", "sed -i 's/$password = 'pass01';/$password = '$PASSWORD';/' /var/www/html/controller/util.php"]
+              command: ["/bin/sh", "-c", 'sed -i "s/$password = 'pass01';/$password = '$PASSWORD';/" /var/www/html/controller/util.php']
         env:
         - name: PASSWORD
           value: "123456"
