@@ -30,7 +30,6 @@ spec:
         imagePullPolicy: Always
         name: php
         resources: {}  
-        
         env:
         - name: PASSWORD
           value: "123456"
